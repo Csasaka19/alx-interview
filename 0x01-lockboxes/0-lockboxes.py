@@ -1,5 +1,7 @@
 #!/bin/python3
 """LOCKBOXES"""
+
+
 def canUnlockAll(boxes):
     """LOCKBOXES CLASS"""
     # if the list is empty
