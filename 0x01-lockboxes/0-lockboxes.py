@@ -1,5 +1,5 @@
-#!/bin/python3
-"""LOCKBOXES"""
+#!/usr/bin/python3
+"""LOCKBOXES module"""
 
 
 def canUnlockAll(boxes):
