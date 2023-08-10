@@ -14,4 +14,3 @@ def minOperations(n: int = 0) -> int:
             if n % i == 0:
                 # recursive call
                 return minOperations(int(n / i)) + i
-    
