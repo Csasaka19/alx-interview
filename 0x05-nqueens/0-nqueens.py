@@ -1,118 +1,113 @@
 #!/usr/bin/python3
-"""BackTracking Algorithm to solve N-Queens problem module"""
+"""N queens solution finder module.
+"""
 import sys
 
-# Size of the board
-board = 0
-# Possible solutions
+
 solutions = []
-# Position of the queens
+"""The list of possible solutions to the N queens problem.
+"""
+n = 0
+"""The size of the chessboard.
+"""
 pos = None
+"""The list of possible positions on the chessboard.
+"""
 
 
-def queen_input():
-    """Receives the user's input and validates it"""
-    global board
+def get_input():
+    """Retrieves and validates this program's argument.
+
+    Returns:
+        int: The size of the chessboard.
+    """
+    global n
+    n = 0
     if len(sys.argv) != 2:
-        print("Usage: nqueens N\n")
+        print("Usage: nqueens N")
         sys.exit(1)
     try:
-        board = int(sys.argv[1])
-    except ValueError:
+        n = int(sys.argv[1])
+    except Exception:
         print("N must be a number")
         sys.exit(1)
-    if board < 4:
+    if n < 4:
         print("N must be at least 4")
         sys.exit(1)
+    return n
 
 
-def isSafe(row, col):
-    """Check if a queen can be placed on board[row][col]"""
-    # Check this row on left side
-    for i in range(col):
-        if (pos[row][i]):
-            return False
-    # Check upper diagonal on left side
-    for i, j in zip(range(row, -1, -1), range(col, -1, -1)):
-        if (pos[i][j]):
-            return False
-    # Check lower diagonal on left side
-    for i, j in zip(range(row, board, 1), range(col, -1, -1)):
-        if (pos[i][j]):
-            return False
-    return True
+def is_attacking(pos0, pos1):
+    """Checks if the positions of two queens are in an attacking mode.
 
+    Args:
+        pos0 (list or tuple): The first queen's position.
+        pos1 (list or tuple): The second queen's position.
 
-def is_attacking():
-    """Checks which positions are attacking each other
-    on the board
+    Returns:
+        bool: True if the queens are in an attacking position else False.
     """
-    if len(pos) == 0:
-        return False
-    for i in range(board):
-        for j in range(board):
-            if pos[i][j]:
-                for k in range(board):
-                    if k != j:
-                        pos[i][k] = True
-                    if k != i:
-                        pos[k][j] = True
-                for k in range(board):
-                    if i + k < board and j + k < board:
-                        pos[i + k][j + k] = True
-                    if i - k >= 0 and j - k >= 0:
-                        pos[i - k][j - k] = True
-                    if i + k < board and j - k >= 0:
-                        pos[i + k][j - k] = True
-                    if i - k >= 0 and j + k < board:
-                        pos[i - k][j + k] = True
-    return True
+    if (pos0[0] == pos1[0]) or (pos0[1] == pos1[1]):
+        return True
+    return abs(pos0[0] - pos1[0]) == abs(pos0[1] - pos1[1])
 
-def solution_exists():
-    """Checks whether a group of solutions exists"""
-    global pos
-    pos = [[False for j in range(board)] for i in range(board)]
-    for i in range(board):
-        for j in range(board):
-            if isSafe(i, j):
-                pos[i][j] = True
-                if is_attacking():
-                    return True
-                pos[i][j] = False
+
+def group_exists(group):
+    """Checks if a group exists in the list of solutions.
+
+    Args:
+        group (list of integers): A group of possible positions.
+
+    Returns:
+        bool: True if it exists, otherwise False.
+    """
+    global solutions
+    for stn in solutions:
+        i = 0
+        for stn_pos in stn:
+            for grp_pos in group:
+                if stn_pos[0] == grp_pos[0] and stn_pos[1] == grp_pos[1]:
+                    i += 1
+        if i == n:
+            return True
     return False
 
-def build_solutions():
-    """Creates solutions for the input given by the user"""
-    global solutions
-    global board
-    global pos
-    pos = [[False for j in range(board)] for i in range(board)]
-    for i in range(board):
-        for j in range(board):
-            if isSafe(i, j):
-                pos[i][j] = True
-                if is_attacking():
-                    solutions.append(pos)
-                pos[i][j] = False
-    return solutions
 
-def print_solutions():
-    """Prints the solutions to the N-Queens problem"""
+def build_solution(row, group):
+    """Builds a solution for the n queens problem.
+
+    Args:
+        row (int): The current row in the chessboard.
+        group (list of lists of integers): The group of valid positions.
+    """
     global solutions
-    global board
-    if len(solutions) == 0:
-        print("No solution")
-        return
-    for solution in solutions:
-        for i in range(board):
-            for j in range(board):
-                if solution[i][j]:
-                    print("[{:d}, {:d}]".format(i, j), end="")
-        print("")
-        
-board = queen_input()
-solution_exists()
-build_solutions()
-print_solutions()
+    global n
+    if row == n:
+        tmp0 = group.copy()
+        if not group_exists(tmp0):
+            solutions.append(tmp0)
+    else:
+        for col in range(n):
+            a = (row * n) + col
+            matches = zip(list([pos[a]]) * len(group), group)
+            used_positions = map(lambda x: is_attacking(x[0], x[1]), matches)
+            group.append(pos[a].copy())
+            if not any(used_positions):
+                build_solution(row + 1, group)
+            group.pop(len(group) - 1)
+
+
+def get_solutions():
+    """Gets the solutions for the given chessboard size.
+    """
+    global pos, n
+    pos = list(map(lambda x: [x // n, x % n], range(n ** 2)))
+    a = 0
+    group = []
+    build_solution(a, group)
+
+
+n = get_input()
+get_solutions()
 for solution in solutions:
     print(solution)
